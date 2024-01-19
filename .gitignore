@@ -62,7 +62,6 @@ for x in range(0, y-1):
 #PARTE2--------------------------------------------------------------------------------------------------------------------------
 
 x=0
-
 options = webdriver.ChromeOptions()
 options.add_experimental_option('prefs', {
 "download.default_directory": "C:\\Caminho",
