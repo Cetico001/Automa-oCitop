@@ -74,7 +74,7 @@ driver = webdriver.Chrome(options=options)
 
 wait = WebDriverWait(driver, 10)
 
-driver.get(r'https://citop.transfacil.com.br/ecitop/inicial.do?evento=cookie')
+driver.get(r'https://site')
 
 conta = driver.find_element('xpath', '/html/body/table/tbody/tr/td/form/div[2]/table/tbody/tr[2]/td[2]/table/tbody/tr[1]/td[2]/input')
 conta.send_keys('login-site')
