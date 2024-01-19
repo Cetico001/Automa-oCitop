@@ -1,160 +1,167 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+import win32com.client
+import os
+from datetime import datetime
+from collections import OrderedDict
+import time
 
-# C extensions
-*.so
+#PARTE1--------------------------------------------------------------------------------------------------------------------------
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+Excel = win32com.client.Dispatch("Excel.Application")
+Workbook = Excel.ActiveWorkbook
+Worksheet = Workbook.Worksheets[3]
+data_i = Worksheet.Range("AR2").Value
+data_i = str(data_i)
+data_i = data_i.split(' ')[0]
+periodo1 = data_i[8:10] + '-' + data_i[5:7] + '-' + data_i[:4]
+data_i = data_i[8:10] + '/' + data_i[5:7] + '/' + data_i[:4]
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+used = Worksheet.UsedRange
+valorf = int(used.Row + used.Rows.Count - 1)
+data_f = Worksheet.Range("AR" + str(valorf)).Value
+data_f = str(data_f)
+data_f = data_f.split(' ')[0]
+periodo2 = data_f[8:10] + '-' + data_f[5:7] + '-' + data_f[:4]
+data_f = data_f[8:10] + '/' + data_f[5:7] + '/' + data_f[:4]
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+periodo=periodo1+' '+periodo2
+periodo=str(periodo)
+vet = list(range(valorf))
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
+y=0
+for x in range(2, valorf):
+    verificar = Worksheet.Range("BB" + str(x)).Value
+    verificar2 = Worksheet.Range("AX" + str(x)).Value
+    if verificar=='Viagem realizada com km abaixo do limite de 90% da extensão referencial (Art. 61, inciso IV do Decreto 18.370 de 7 de julho de 2023; Art. 7º da Portaria Nº 024/2023)' and verificar2=='':
+        vet[y]=str(Worksheet.Range("K" + str(x)).Value)
+        vet[y]=vet[y].split('.')[0]
+        y=y+1
+        
+lista_sem_repeticao = list(OrderedDict.fromkeys(vet))
 
-# Translations
-*.mo
-*.pot
+total=0
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+for x in range(0, y-1):
+    teste=0
+    
+    for z in range(0, y-1):
+        if lista_sem_repeticao[x]==vet[z] and teste==0:
+            teste=1
+            
+    if teste==0:
+        lista_sem_repeticao[x]=''
+    else:
+        total=total+1
+        
+#PARTE1--------------------------------------------------------------------------------------------------------------------------
 
-# Flask stuff:
-instance/
-.webassets-cache
+#PARTE2--------------------------------------------------------------------------------------------------------------------------
 
-# Scrapy stuff:
-.scrapy
+x=0
 
-# Sphinx documentation
-docs/_build/
+options = webdriver.ChromeOptions()
+options.add_experimental_option('prefs', {
+"download.default_directory": "C:\\Caminho",
+"download.prompt_for_download": False,
+"download.directory_upgrade": True,
+"plugins.always_open_pdf_externally": True
+})
+driver = webdriver.Chrome(options=options)
 
-# PyBuilder
-.pybuilder/
-target/
+wait = WebDriverWait(driver, 10)
 
-# Jupyter Notebook
-.ipynb_checkpoints
+driver.get(r'https://citop.transfacil.com.br/ecitop/inicial.do?evento=cookie')
 
-# IPython
-profile_default/
-ipython_config.py
+conta = driver.find_element('xpath', '/html/body/table/tbody/tr/td/form/div[2]/table/tbody/tr[2]/td[2]/table/tbody/tr[1]/td[2]/input')
+conta.send_keys('login-site')
+senha = driver.find_element('xpath', '/html/body/table/tbody/tr/td/form/div[2]/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td[2]/input')
+senha.send_keys('senha-site')
+confirmar = driver.find_element('xpath', '/html/body/table/tbody/tr/td/form/div[2]/table/tbody/tr[3]/td[2]/input')
+confirmar.click()
 
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
+driver.get(r'https://citop.transfacil.com.br/ecitop/relopemapadecontroleoperacional.do?evento=x')
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+operadora = driver.find_element('xpath', '//*[@id="AJAX"]//table[2]/tbody/tr[2]/td/a[1]/span')
+operadora.click()
 
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
+nova_janela = WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
 
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/#use-with-ide
-.pdm.toml
+janelas = driver.window_handles
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
+driver.switch_to.window(janelas[1])
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+driver.maximize_window()
+operadorap = driver.find_element('xpath', '//*[@id="id_Arg"]')
+operadorap.send_keys('087')
+operadorap.send_keys(Keys.ENTER)
 
-# SageMath parsed files
-*.sage.py
+confirmar = wait.until(EC.presence_of_element_located(('xpath', '//*[@id="AJAX"]/ajax/form/table[7]/tbody/tr[2]/td[2]/a')))
+confirmar.click()
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+driver.switch_to.window(janelas[0])
+manual = wait.until(EC.presence_of_element_located(('xpath', '/html/body/table[3]/tbody/tr[2]/td[1]/input')))
+manual.click()
 
-# Spyder project settings
-.spyderproject
-.spyproject
+dat = driver.execute_script('return document.querySelector("#AJAX input[name=\'dataInicio_Arg\']")')
+driver.execute_script("arguments[0].value = '';", dat)
+dat.send_keys(data_i)
 
-# Rope project settings
-.ropeproject
+datf = driver.execute_script('return document.querySelector("#AJAX input[name=\'dataFim_Arg\']")')
+driver.execute_script("arguments[0].value = '';", datf)
+datf.send_keys(data_f)
 
-# mkdocs documentation
-/site
+for x in range(0, total):
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+    veiculo = wait.until(EC.presence_of_element_located(('xpath', '//*[@id="veiculo"]/a[1]/span')))
+    veiculo.click()
+    
+    driver.switch_to.window(driver.window_handles[1])
 
-# Pyre type checker
-.pyre/
+    driver.maximize_window()
+    veiculo2 = driver.find_element('xpath', '//*[@id="codExterno_Arg"]')
+    veiculo2.send_keys(lista_sem_repeticao[x])
+    veiculo2.send_keys(Keys.ENTER)
 
-# pytype static type analyzer
-.pytype/
+    time.sleep(1)
+    confirmar = wait.until(EC.presence_of_element_located(('xpath', '//*[@id="AJAX"]/ajax/form/table[7]/tbody/tr[2]/td[1]/a')))
+    confirmar.click()
 
-# Cython debug symbols
-cython_debug/
+    time.sleep(2)
+    driver.switch_to.window(driver.window_handles[0])
+    gerar_relatorio = wait.until(EC.presence_of_element_located(('xpath', '//*[@id="botao_menu"]')))
+    gerar_relatorio.click()
+    
+    time.sleep(3)
+    driver.switch_to.window(driver.window_handles[1])
+    driver.close()
+    driver.switch_to.window(driver.window_handles[0])
+    
+#PARTE2--------------------------------------------------------------------------------------------------------------------------
 
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+#PARTE3--------------------------------------------------------------------------------------------------------------------------
+
+diretorio = "C:\\Caminho"  
+
+for nome_arquivo in os.listdir(diretorio):
+    if nome_arquivo.endswith(").pdf"):
+        novo=nome_arquivo.split('(')
+        novo=novo[1].split(')')
+        novo=novo[0]
+        novo=int(novo)
+        print(novo)
+        print(periodo)
+        caminho_original = os.path.join(diretorio, nome_arquivo)
+        novo_nome_arquivo = f"exploderelatorio {periodo} {lista_sem_repeticao[novo]}.pdf"
+        caminho_destino = os.path.join(diretorio, novo_nome_arquivo)
+    else:
+        caminho_original = os.path.join(diretorio, nome_arquivo)
+        novo_nome_arquivo = f"exploderelatorio {periodo} {lista_sem_repeticao[0]}.pdf"
+        caminho_destino = os.path.join(diretorio, novo_nome_arquivo)
+    os.rename(caminho_original, caminho_destino)
+print("Renomeação concluída.")
+
+#PARTE3--------------------------------------------------------------------------------------------------------------------------
