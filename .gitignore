@@ -83,7 +83,7 @@ senha.send_keys('senha-site')
 confirmar = driver.find_element('xpath', '/html/body/table/tbody/tr/td/form/div[2]/table/tbody/tr[3]/td[2]/input')
 confirmar.click()
 
-driver.get(r'https://citop.transfacil.com.br/ecitop/relopemapadecontroleoperacional.do?evento=x')
+driver.get(r'https://site')
 
 operadora = driver.find_element('xpath', '//*[@id="AJAX"]//table[2]/tbody/tr[2]/td/a[1]/span')
 operadora.click()
